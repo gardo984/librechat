@@ -5,6 +5,26 @@ const { Message } = require('~/db/models');
 
 const idSchema = z.string().uuid();
 
+
+const getLogStores = require('~/cache/getLogStores');
+const { CacheKeys } = require('librechat-data-provider');
+
+/**
+ * Invalidates the message cache for a specific conversation and user.
+ * @param {string} conversationId - The conversation ID
+ * @param {string} userId - The user ID
+ */
+async function invalidateMessageCache(conversationId, userId) {
+  try {
+    const messageCache = getLogStores(CacheKeys.MESSAGES);
+    const cacheKey = `${conversationId}:${userId}`;
+    await messageCache.delete(cacheKey);
+  } catch (err) {
+    // Don't throw - cache invalidation failure shouldn't break the operation
+    logger.warn('Failed to invalidate message cache:', err);
+  }
+}
+
 /**
  * Saves a message in the database.
  *
@@ -79,6 +99,10 @@ async function saveMessage(req, params, metadata) {
       update,
       { upsert: true, new: true },
     );
+
+    /* invalidate cache after saving */
+    console.log(`Clean message cache after saving msg for conversationId/userId ${params.conversationId}:${req.user.id}`);
+    await invalidateMessageCache(update.conversationId || params.conversationId, req.user.id);
 
     return message.toObject();
   } catch (err) {
@@ -251,6 +275,12 @@ async function updateMessage(req, message, metadata) {
       throw new Error('Message not found or user not authorized.');
     }
 
+    /* invalidate cache after updating */
+    if (updatedMessage.conversationId) {
+      console.log(`Clean message cache after update msg for conversationId/userId ${updatedMessage.conversationId}:${req.user.id}`);
+      await invalidateMessageCache(updatedMessage.conversationId, req.user.id);
+    }
+
     return {
       messageId: updatedMessage.messageId,
       conversationId: updatedMessage.conversationId,
@@ -288,6 +318,9 @@ async function deleteMessagesSince(req, { messageId, conversationId }) {
 
     if (message) {
       const query = Message.find({ conversationId, user: req.user.id });
+      /* invalidate cache before to delete */
+      console.log(`Clean message cache before deleteMessageSince for conversationId/userId ${conversationId}:${req.user.id}`);
+      await invalidateMessageCache(conversationId, req.user.id);
       return await query.deleteMany({
         createdAt: { $gt: message.createdAt },
       });
@@ -352,6 +385,10 @@ async function getMessage({ user, messageId }) {
  */
 async function deleteMessages(filter) {
   try {
+    if (filter.conversationId && filter.user) {
+      console.log(`Clean message cache before delete msgs for conversationId/userId ${filter.conversationId}:${filter.user}`);
+      await invalidateMessageCache(filter.conversationId, filter.user);
+    }
     return await Message.deleteMany(filter);
   } catch (err) {
     logger.error('Error deleting messages:', err);
@@ -369,4 +406,5 @@ module.exports = {
   getMessages,
   getMessage,
   deleteMessages,
+  invalidateMessageCache,
 };

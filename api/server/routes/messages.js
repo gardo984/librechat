@@ -16,6 +16,10 @@ const { requireJwtAuth, validateMessageReq } = require('~/server/middleware');
 const { getConvosQueried } = require('~/models/Conversation');
 const { Message } = require('~/db/models');
 
+/* for redis cache */
+const getLogStores = require('~/cache/getLogStores');
+const { CacheKeys } = require('librechat-data-provider');
+
 const router = express.Router();
 router.use(requireJwtAuth);
 
@@ -282,8 +286,22 @@ router.post('/artifact/:messageId', async (req, res) => {
 /* Note: It's necessary to add `validateMessageReq` within route definition for correct params */
 router.get('/:conversationId', validateMessageReq, async (req, res) => {
   try {
+    const msgCache = getLogStores(CacheKeys.MESSAGES);
+    const userId = req.user.id;
     const { conversationId } = req.params;
-    const messages = await getMessages({ conversationId }, '-_id -__v -user');
+    const cacheKey = `${conversationId}:${userId}`;
+    let messages = await msgCache.get(cacheKey);
+    if (!messages) {
+      console.log(`Getting messages from mongodb by conversationId/userId=${cacheKey}`);
+      messages = await getMessages({ conversationId }, '-_id -__v -user');
+      console.log(`DB items: ${messages.length}`);
+      if (messages && messages.length > 0) {
+        await msgCache.set(cacheKey, messages);
+      }
+    } else {
+      console.log(`Getting messages from cache by conversationId/userId=${cacheKey}`);
+      console.log(`Cache items: ${messages.length}`);
+    }
     res.status(200).json(messages);
   } catch (error) {
     logger.error('Error fetching messages:', error);
@@ -404,8 +422,13 @@ router.put('/:conversationId/:messageId/feedback', validateMessageReq, async (re
 
 router.delete('/:conversationId/:messageId', validateMessageReq, async (req, res) => {
   try {
-    const { messageId } = req.params;
-    await deleteMessages({ messageId });
+    const { messageId, conversationId } = req.params;
+    const userId = req.user.id;
+    await deleteMessages({
+       messageId,
+       user: userId,
+       conversationId,
+    });
     res.status(204).send();
   } catch (error) {
     logger.error('Error deleting message:', error);
