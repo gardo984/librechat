@@ -52,13 +52,12 @@ One open foundation where agents, knowledge, and models live together — and wh
 
 ### In the UI
 
-![LibreChat demo — the "Pipeline Engineer" agent walking through Jenkins pipelines, with the GitHub Copilot model picker open (Copilot GPT-4o, Copilot Claude Sonnet 5, Copilot Gemini 3.8 Flash)](resources/demo-copilot-models.png)
+<img src="resources/demo-copilot-models.webp" alt="LibreChat demo — the Pipeline Engineer agent walking through Jenkins pipelines, with the GitHub Copilot model picker open (Copilot GPT-4o, Copilot Claude Sonnet 5, Copilot Gemini 3.8 Flash)" width="820">
 
-![Agent Builder — creating the "Pipeline Engineer" agent (category: IT, model: gpt-4o), with name, description, instructions, and variables](resources/demo-agent-builder.png)
+<img src="resources/demo-agent-builder.webp" alt="Agent Builder — creating the Pipeline Engineer agent (category: IT, model: gpt-4o), with name, description, instructions, and variables" width="360">
+<img src="resources/demo-agent-builder-model.webp" alt="Agent Builder to Model Parameters — provider set to github-copilot, with the model dropdown open (gpt-4o selected)" width="360">
 
-![Agent Builder → Model Parameters — provider set to `github-copilot`, with the model dropdown open (gpt-4o selected; gpt-4o-mini, gpt-5.5, claude-sonnet-5, claude-opus-4.8, gemini-3.8-flash, grok-4.7)](resources/demo-agent-builder-model.png)
-
-![Agent Marketplace — discover and use shared agents, filterable by category (the "Pipeline Engineer" IT agent is listed; search bar and General / HR / IT filters)](resources/demo-agent-marketplace.png)
+<img src="resources/demo-agent-marketplace.webp" alt="Agent Marketplace — discover and use shared agents, filterable by category (the Pipeline Engineer IT agent is listed)" width="820">
 
 ---
 
@@ -234,7 +233,7 @@ You'll see the response stream token-by-token in the terminal — proof that the
 
 ### Live demo script (suggested 5 min)
 
-![LibreChat login screen at localhost:3080](resources/demo-login.png)
+<img src="resources/demo-login.webp" alt="LibreChat login screen at localhost:3080" width="640">
 
 1. **Show the UI** — open `localhost:3080`, point out the model chips (🚀 Copilot GPT-4o, Claude Sonnet, Gemini).
 2. **Chat with Copilot models** — send a prompt, switch model mid-conversation.
