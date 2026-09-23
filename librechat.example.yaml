@@ -609,3 +609,156 @@ endpoints:
 #     # instructions: "You are a memory management assistant. Store and manage user information accurately."
 #     # model_parameters:
 #     #   temperature: 0.1
+
+---
+#============================================================#
+# LibreChat Configuration v2
+#============================================================#
+
+version: 1.3.4 # Or your specific config version
+cache: true
+ 
+interface:
+  # MCP Servers UI configuration
+  mcpServers:
+    placeholder: 'MCP Servers'
+    
+  # Privacy policy settings
+  privacyPolicy:
+    externalUrl: 'https://librechat.ai/privacy-policy'
+    openNewTab: true
+ 
+  # Terms of service
+  termsOfService:
+    externalUrl: 'https://librechat.ai/tos'
+    openNewTab: true
+ 
+#registration:
+#  socialLogins: ["discord", "facebook", "github", "google", "openid"]
+
+#============================================================#
+# Endpoints Configuration
+#============================================================#
+
+endpoints:
+  #------------ Google Gemini (Native Endpoint) ------------
+  google:
+    apiKey: ${GOOGLE_KEY}
+    # Models are defined via GOOGLE_MODELS in .env file
+    titleModel: "gemini-2.5-flash"
+    modelDisplayLabel: "Google Gemini"
+
+  custom:
+  #------------ DeepSeek ------------
+  - name: deepseek
+    #type: deepseek
+    apiKey: ${DEEPSEEK_API_KEY}
+    baseURL: 'https://api.deepseek.com'
+    models:
+      fetch: false
+      default:
+        - deepseek-chat
+        - deepseek-coder
+    title: "DeepSeek"
+    modelDisplayLabel: "DeepSeek"
+    #description: DeepSeek AI models
+
+  #------------ GitHub Copilot ------------
+  # Uses the short-lived bearer exchanged from COPILOT_TOKEN.
+  # Refresh it with: test-clients/refresh-copilot-bearer.py
+  - name: "github-copilot"
+    apiKey: ${COPILOT_BEARER}
+    baseURL: "https://api.individual.githubcopilot.com"
+    headers:
+      User-Agent: "GitHubCopilotChat/0.26.7"
+      Copilot-Integration-Id: "vscode-chat"
+      Editor-Version: "vscode/1.95.0"
+    models:
+      fetch: false
+      default:
+        - gpt-4o
+        - gpt-4o-mini
+        - gpt-5.5
+        - claude-sonnet-5
+        - claude-opus-4.8
+        - gemini-3.8-flash
+        - grok-4.7
+    title: "GitHub Copilot"
+    modelDisplayLabel: "GitHub Copilot"
+
+#============================================================#
+# Agent Configurations (Model Specs)
+#============================================================#
+
+modelSpecs:
+  list:
+    #------------ Copilot ------------
+    - name: "copilot-gpt4o"
+      label: "🚀 Copilot GPT-4o"
+      description: "GitHub Copilot's GPT-4o via your subscription"
+      group: "GitHub Copilot"
+      groupIcon: "https://github.githubassets.com/images/modules/site/copilot/copilot.png"
+      preset:
+        endpoint: "github-copilot"
+        model: "gpt-4o"
+        temperature: 0.7
+        maxOutputTokens: 4096
+    #------------ Copilot Claude Sonnet ------------
+    - name: "copilot-claude-sonnet"
+      label: "🚀 Copilot Claude Sonnet 5"
+      description: "Anthropic's Claude Sonnet 5 via your Copilot subscription"
+      group: "GitHub Copilot"
+      groupIcon: "https://github.githubassets.com/images/modules/site/copilot/copilot.png"
+      preset:
+        endpoint: "github-copilot"
+        model: "claude-sonnet-5"
+        temperature: 0.7
+        maxOutputTokens: 4096
+    #------------ Copilot Gemini ------------
+    - name: "copilot-gemini"
+      label: "🚀 Copilot Gemini 3.8 Flash"
+      description: "Google's Gemini 3.8 Flash via your Copilot subscription"
+      group: "GitHub Copilot"
+      groupIcon: "https://github.githubassets.com/images/modules/site/copilot/copilot.png"
+      preset:
+        endpoint: "github-copilot"
+        model: "gemini-3.8-flash"
+        temperature: 0.7
+        maxOutputTokens: 4096
+    #------------ Google Gemini Agent ------------
+    - name: "google-assistant"
+      label: "Google AI Assistant"
+      description: "Fast, general-purpose assistant powered by Google Gemini"
+      group: "My Agents"
+      groupIcon: "https://www.gstatic.com/lamda/images/gemini_sparkle_v002_d4735304ff6292a690345.svg"
+      preset:
+        endpoint: "google"
+        model: "gemini-2.5-flash"
+        temperature: 0.7
+        maxOutputTokens: 2048
+        # Optional: Add custom instructions
+        # instructions: "You are a helpful assistant powered by Google Gemini."
+    
+    #------------ DeepSeek Coder Agent ------------
+    - name: "deepseek-coder-agent"
+      label: "DeepSeek Coder"
+      description: "Specialized coding assistant optimized for programming tasks"
+      group: "My Agents"
+      preset:
+        endpoint: "deepseek"
+        model: "deepseek-coder"
+        temperature: 0.3
+        max_tokens: 4096
+        instructions: "You are an expert programming assistant. Help with code review, debugging, optimization, and best practices. Provide clear explanations and well-commented code examples."
+    
+    #------------ DeepSeek Chat Agent ------------
+    - name: "deepseek-chat-agent"
+      label: "DeepSeek Chat"
+      description: "General purpose assistant using DeepSeek's chat model"
+      group: "My Agents"
+      preset:
+        endpoint: "deepseek"
+        model: "deepseek-chat"
+        temperature: 0.7
+        max_tokens: 4096
+        instructions: "You are a helpful AI assistant. Provide clear, accurate, and thoughtful responses."
